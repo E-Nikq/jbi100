@@ -2,7 +2,7 @@ import csv
 import pandas as pd
 from typing import List, Dict
 import re
-
+import pickle
 
 # important columns: Month, Age, Annual_Income, Monthly_Inhand_Salary, Num_Bank_Accounts, Num_Credit_Card, Interest_Rate
 # ...,Num_of_Loan, Type_of_Loan, Delay_from_due_date, Num_of_Delayed_Payment, Changed_Credit_Limit, Num_Credit_Inquiries, Credit_Mix
@@ -57,15 +57,12 @@ with open(file_path, mode='r', newline='') as file:
         # Add the cleaned row dictionary to the list
         list_of_dicts.append(cleaned_row)
 
-# Printing the cleaned data
-for row_dict in list_of_dicts:
-    print(row_dict)
 
 
-
-
-
-
+# import pickle
+#
+# with open('cleaned_data.pkl', 'wb') as file:
+#     pickle.dump(list_of_dicts, file)
 
 # credit_data = pd.read_csv("all_data.csv", delimiter=";")
 
