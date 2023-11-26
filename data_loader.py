@@ -81,3 +81,8 @@ for row_dict in list_of_dicts:
 # print(credit_data.columns)
 # print(credit_data.dtypes)
 # print(credit_data)
+
+# pd.plotting.scatter_matrix(credit_data[["age", "Annual_Income", "Monthly_Inhand_Salary", "Num_Bank_Accounts","Num_Credit_Card", "Interest_Rate", "Num_of_Loan", "Delay_from_due_date",
+#                                         "Num_of_Delayed_Payment", "Changed_Credit_Limit", "Num_Credit_Inquiries",
+#                                         "Outstanding_Debt", "Credit_Utilization_Ratio", "Total_EMI_per_month",
+#                                         "Amount_invested_monthly", "Monthly_Balance"]], diagonal="kde", figsize=(10, 10))
