@@ -101,7 +101,7 @@ def display_selected_data(click_data, selected_age):
             {'Metric': 'Average Age', 'Value': selected_data['Age']},
             {'Metric': 'Average Annual Income', 'Value': selected_data['Annual_Income']},
             {'Metric': 'Credit Utilization Ratio', 'Value': selected_data['Credit_Utilization_Ratio']},
-            {'Metric': 'Frequency of Good Credit Score', 'Value': selected_data['Credit_Score']},
+            {'Metric': 'Credit Score', 'Value': selected_data['Credit_Score']},
         ]
 
         return html.Div([
