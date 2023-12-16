@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 
 # Load the modified data from the file
-df = pd.read_excel("final_cleaned_data.xlsx")
+df = pd.read_excel("final_cleaned_data_new.xlsx")
 
 # Calculate average outstanding debt per occupation and age of credit history
 def most_frequent_credit_score(x):
