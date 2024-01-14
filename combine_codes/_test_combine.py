@@ -5,8 +5,9 @@ import plotly.express as px
 import plotly.figure_factory as ff
 import numpy as np
 from dash.dependencies import Input, Output
+from dash.exceptions import PreventUpdate
 
-df = pd.read_excel('../final_cleaned_data_new_good.xlsx')
+df = pd.read_excel('../used_data.xlsx')
 
 app = Dash(__name__)
 
@@ -16,6 +17,8 @@ def most_frequent_credit_score(x):
         if not value_counts.empty:
             return value_counts.idxmax()
     return None
+
+
 
 avg_debt_per_occupation_age = df.groupby(['Occupation', 'Credit_History_Age']).agg({
     'Outstanding_Debt': 'mean',
@@ -31,6 +34,12 @@ avg_debt_per_occupation_age = avg_debt_per_occupation_age.round({'Outstanding_De
                                                                 'Credit_Utilization_Ratio': 0,
                                                                 'Credit_Score': 0})
 
+avg_income_per_occupation = df.groupby('Occupation')['Annual_Income_Code2'].mean().reset_index()
+avg_debt_per_occupation = df.groupby('Occupation')['Outstanding_Debt'].mean().reset_index()
+avg_income_per_occupation.columns = ['Occupation', 'Avg_Annual_Income']
+avg_debt_per_occupation.columns = ['Occupation', 'Avg_Outstanding_Debt']
+
+
 min_age = int(df['Credit_History_Age'].min())
 max_age = min(33, int(df['Credit_History_Age'].max()))
 
@@ -39,6 +48,47 @@ colors = {
     'background': '#111111',
     'text': '#7FDBFF'
 }
+
+# Step 2: Calculate Credit Score Probability
+credit_score_probabilities = df.groupby('Occupation')['Credit_Score'].apply(lambda x: (x == 'Poor').mean()).reset_index()
+credit_score_probabilities.columns = ['Occupation', 'Credit_Score_Probability']
+
+# Step 3: Add the Columns to DataFrame
+df = pd.merge(df, avg_income_per_occupation, on='Occupation', how='left')
+df = pd.merge(df, avg_debt_per_occupation, on='Occupation', how='left')
+df = pd.merge(df, credit_score_probabilities, on='Occupation', how='left')
+
+
+scatter_fig = px.scatter(
+    df,
+    x='Avg_Annual_Income',
+    y='Avg_Outstanding_Debt',
+    size='Credit_Score_Probability',
+    color='Occupation',
+    labels={'Avg_Annual_Income': 'Average Annual Income in $', 'Avg_Outstanding_Debt': 'Average Outstanding Debt in $'},
+    title='Scatter Plot with Credit Score Probability',
+    hover_data={'Credit_Score_Probability': ':.2%'},
+    size_max=250  # Adjust the maximum size of the bubbles
+)
+
+scatter_fig.update_layout(
+    plot_bgcolor=colors['background'],
+    paper_bgcolor=colors['background'],
+    font_color=colors['text'],
+    title='Scatter Plot with Credit Score Probability',
+    annotations=[
+        {
+            'x': 0.5,
+            'y': 1.07,
+            'xref': 'paper',
+            'yref': 'paper',
+            'text': 'Bubble size is proportional to the probability of the credit score being \'Poor\'',
+            'showarrow': False,
+            'font': {'size': 14, 'color': colors['text']}
+        }
+    ],
+    height=800
+)
 
 Categorical_names = ['Credit_Mix', 'Occupation', 'Payment_of_Min_Amount', 'Month', 'Credit_Score',
                      'Payment_Behaviour']
@@ -161,8 +211,29 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'height': 
                         inline=True,
                     )]),
                 dcc.Graph(id="Add_chart")
-             ])
+             ]),
+
+    html.Div(style={'flexgrow':1,'backgroundColor': colors['background']}, children=[
+
+        html.H1(
+        children='Scatter Plot',
+        style={'textAlign': 'center',
+               'color': colors['text'] }
+    ),
+    dcc.Graph(
+        id='Scatter Plot',
+        style={'width': '100%', 'Align': 'center'},
+        figure=scatter_fig
+    ),
+
+    ])
+
 ])
+
+
+
+
+
 @app.callback(
     Output('credit-score-graph', 'figure'),
     [Input('credit-age-slider', 'value'),
@@ -184,7 +255,7 @@ def update_graph(selected_age, selected_occupation):
                 'y': filtered_df['Outstanding_Debt'],
                 'type': 'bar',
                 'name': 'Average Debt per Occupation',
-                'marker': {'color': filtered_df['Annual_Income'], 'colorbar': {'title': 'Average Annual Income'}},
+                'marker': {'color': filtered_df['Annual_Income_Code2'], 'colorbar': {'title': 'Average Annual Income'}},
             },
         ],
         'layout': {
@@ -347,6 +418,9 @@ def Update_add_charts(DropdownAttribute, X_axis_type, Hist_rug_none, clickData_R
                       paper_bgcolor=colors['background'],
                       font_color=colors['text'])
     return fig
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
