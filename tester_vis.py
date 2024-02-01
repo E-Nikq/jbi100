@@ -1,5 +1,5 @@
 import plotly.graph_objects as go
-from dash import Dash, dcc, html, Input, Output, State, dash_table
+from dash import Dash, dcc, html, Input, Output, State, dash_table, callback_context
 import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
@@ -159,7 +159,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'height': 
         ])
     ]),
 
-    html.Div(style={'margin-top': '0px', 'backgroundColor': colors["background"], 'padding-left': '10px','width': '50%'},
+    html.Div(style={'margin-top': '0px', 'backgroundColor': colors["background"], 'padding-left': '10px','width': '100%'},
              children=[
                  html.Div(style={'width': '80%', 'color': colors['text'], 'backgroundColor':colors["background"]},children=[
                     dcc.RadioItems(id='distribution',
@@ -177,7 +177,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'height': 
                     )]),
                 dcc.Graph(id="Add_chart")
              ]),
-    html.Div(style={'backgroundColor': 'black', 'color': 'white'}, children=[
+    html.Div(style={'backgroundColor': 'black', 'color': 'white', "margin-top": "0px"}, children=[
         html.H1(
             children='Bar Chart',
             style={'textAlign': 'center',
@@ -215,11 +215,17 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'height': 
         style={'textAlign': 'center',
                'color': colors['text'] }
     ),
+    html.Button(
+            id='reset-scatter-button',
+            children='Reset Scatter Plot',
+            n_clicks=0,
+            style={'margin-top': '5px'}
+    ),
     dcc.Graph(
         id='Scatter Plot',
         style={'width': '100%', 'Align': 'center'},
         figure=scatter_fig
-    ),
+    )
 
     ])
 
@@ -421,10 +427,20 @@ def Update_add_charts(DropdownAttribute, X_axis_type, Hist_rug_none, clickData_R
 # New callback for bar chart interaction with scatter plot
 @app.callback(
     Output('Scatter Plot', 'figure'),
-    [Input('credit-score-graph', 'clickData')]
+    [Input('credit-score-graph', 'clickData'),
+     Input('reset-scatter-button', 'n_clicks')]
 )
-def update_scatter_plot(selected_bar):
-    if selected_bar:
+def update_scatter_plot(selected_bar, reset_button_clicks):
+    ctx = callback_context
+    if not ctx.triggered_id:
+        raise PreventUpdate
+
+    trigger_id = ctx.triggered_id.split('.')[0]
+
+    if trigger_id == 'reset-scatter-button' or not selected_bar:
+        # Reset the scatter plot to show all data points
+        scatter_figure = scatter_fig
+    else:
         selected_occupation = selected_bar['points'][0]['x']
         filtered_df = df[df['Occupation'] == selected_occupation]
 
@@ -459,9 +475,7 @@ def update_scatter_plot(selected_bar):
             height=800
         )
 
-        return scatter_figure
-
-    raise PreventUpdate
+    return scatter_figure
 
 
 if __name__ == '__main__':
