@@ -5,7 +5,7 @@ import plotly.express as px
 import plotly.figure_factory as ff
 import numpy as np
 
-df = pd.read_excel('C:/Users/Timo/Documents/School NT/Minor/JBI100 Visualization/final_cleaned_data_new_good.xlsx')
+df = pd.read_excel('final_cleaned_data_new_good.xlsx')
 
 app = Dash(__name__)
 

@@ -45,11 +45,11 @@ colors = {
     'text': '#7FDBFF'
 }
 
-# Step 2: Calculate Credit Score Probability
+# Calculate Credit Score Probability
 credit_score_probabilities = df.groupby('Occupation')['Credit_Score'].apply(lambda x: (x == 'Poor').mean()).reset_index()
 credit_score_probabilities.columns = ['Occupation', 'Credit_Score_Probability']
 
-# Step 3: Add the Columns to DataFrame
+# Add the Columns to DataFrame
 df = pd.merge(df, avg_income_per_occupation, on='Occupation', how='left')
 df = pd.merge(df, avg_debt_per_occupation, on='Occupation', how='left')
 df = pd.merge(df, credit_score_probabilities, on='Occupation', how='left')
@@ -232,7 +232,6 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'height': 
 
 ])
 
-# Existing callback for bar chart
 @app.callback(
     Output('credit-score-graph', 'figure'),
     [Input('credit-age-slider', 'value'),
@@ -270,7 +269,7 @@ def update_graph(selected_age, selected_occupation):
 
     return figure
 
-# Existing callback for selected data table
+
 @app.callback(
     Output('page-content', 'children'),
     [Input('credit-score-graph', 'clickData'),
@@ -312,7 +311,7 @@ def display_selected_data_new(chart_click_data, selected_age):
 
     return html.Div()
 
-# Existing callback for set_multi_attributes_options
+
 @app.callback(
     Output('Multi', 'options'),
     [Input('Correlation Heat Map', 'clickData')]
@@ -328,7 +327,7 @@ def set_multi_attributes_options(selected_data):
                 Numeric_names1.remove(remove)
         return [{'label': i, 'value': i} for i in Numeric_names1]
 
-# Existing callback for set_multi_attributes_values
+
 @app.callback(
     Output('Multi', 'value'),
     [Input('Multi', 'options'),
@@ -338,10 +337,8 @@ def set_multi_attributes_values(Available_options, Current_values):
     Av_Op_values = [option['value'] for option in Available_options]
     return [value for value in Av_Op_values if value in Current_values]
 
-# Existing callback for update_RadarChart
 
 
-# Existing callback for set_dist_plots
 @app.callback(
     Output('Radar Chart', "clickData"),
     Input("Radar Chart", "clickData")
@@ -349,7 +346,7 @@ def set_multi_attributes_values(Available_options, Current_values):
 def set_dist_plots(Current_option):
     return Current_option
 
-# Existing callback for Update_add_charts
+
 @app.callback(
     Output('Radar Chart', 'figure'),
     [Input('DropdownAttribute', 'value'),
@@ -441,7 +438,6 @@ def Update_add_charts(DropdownAttribute, X_axis_type, Hist_rug_none, clickData_R
     return fig
 
 
-# New callback for bar chart interaction with scatter plot
 @app.callback(
     Output('Scatter Plot', 'figure'),
     [Input('credit-score-graph', 'clickData'),

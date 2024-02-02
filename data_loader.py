@@ -35,7 +35,7 @@ def clean_value(value, data_type):
 
     return cleaned_value
 
-file_path = 'all_data.csv'
+file_path = 'outdated_files/all_data.csv'
 
 # Initialize an empty list to store dictionaries
 list_of_dicts = []
