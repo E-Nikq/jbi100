@@ -128,11 +128,12 @@ app.layout = html.Div(style={'backgroundColor': colors['background'], 'height': 
     html.Div(style={'flexgrow':1,'backgroundColor': colors['background']}, children=[
         html.H1(
             children='Radar Chart',
-            style={'textAlign': 'center',
-                   'color': colors['text'] }
+            style={'textAlign': 'left',
+                   'color': colors['text'],
+                   'margin-left': '40%'}
         ),
 
-        html.Div(children='Radar Chart', style={
+        html.Div(style={
             'textAlign': 'center',
             'color': colors['text']
         }),
@@ -338,14 +339,31 @@ def set_multi_attributes_values(Available_options, Current_values):
     return [value for value in Av_Op_values if value in Current_values]
 
 # Existing callback for update_RadarChart
+
+
+# Existing callback for set_dist_plots
+@app.callback(
+    Output('Radar Chart', "clickData"),
+    Input("Radar Chart", "clickData")
+)
+def set_dist_plots(Current_option):
+    return Current_option
+
+# Existing callback for Update_add_charts
 @app.callback(
     Output('Radar Chart', 'figure'),
     [Input('DropdownAttribute', 'value'),
      Input('Multi', 'value'),
-     Input('Correlation Heat Map', 'clickData')
+     Input('Correlation Heat Map', 'clickData'),
+     Input("Add_chart",'hoverData')
      ]
 )
-def update_RadarChart(DropdownAttribute, Multi, selected_data):
+def update_RadarChart(DropdownAttribute, Multi, selected_data, hoverData):
+    if callback_context.triggered_id == 'Add_chart':
+        hoverDatavalue = hoverData["points"][0]["curveNumber"]
+    else:
+        hoverDatavalue = range(len(df[DropdownAttribute].unique()))
+
     if selected_data is None or not selected_data['points']:
         MultidropdownAttribute = Multi
     else:
@@ -354,9 +372,16 @@ def update_RadarChart(DropdownAttribute, Multi, selected_data):
             if multi not in MultidropdownAttribute:
                 MultidropdownAttribute.append(multi)
 
-    Unique_Attribute = df[DropdownAttribute].unique()
+    if type(hoverDatavalue) == int:
+        Unique_Attributes = df[DropdownAttribute].unique()
+        Unique_Attribute = [(Unique_Attributes[hoverDatavalue])]
+    else:
+        Unique_Attributes = df[DropdownAttribute].unique()
+        Unique_Attribute = Unique_Attributes[hoverDatavalue]
+
     Mean_Multi_All = df[MultidropdownAttribute].mean()
     Std_Multi_Att = df[MultidropdownAttribute].std()
+
 
     fig = go.Figure()
     for name_uni in Unique_Attribute:
@@ -375,20 +400,11 @@ def update_RadarChart(DropdownAttribute, Multi, selected_data):
                       plot_bgcolor=colors['background'],
                       paper_bgcolor=colors['background'],
                       font_color=colors['text'],
-                      transition_duration=500
+                      transition_duration=500,
                       )
 
     return fig
 
-# Existing callback for set_dist_plots
-@app.callback(
-    Output('Radar Chart', "clickData"),
-    Input("Radar Chart", "clickData")
-)
-def set_dist_plots(Current_option):
-    return Current_option
-
-# Existing callback for Update_add_charts
 @app.callback(
     Output('Add_chart', 'figure'),
     [Input('DropdownAttribute', "value"),
@@ -420,7 +436,8 @@ def Update_add_charts(DropdownAttribute, X_axis_type, Hist_rug_none, clickData_R
     fig.update_layout(transition_duration=500,
                       plot_bgcolor=colors['background'],
                       paper_bgcolor=colors['background'],
-                      font_color=colors['text'])
+                      font_color=colors['text'],
+                      title="Distribution Chart")
     return fig
 
 
